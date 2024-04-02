@@ -1,0 +1,128 @@
+//https://maven.ladysnake.org/releases
+plugins {
+	id 'fabric-loom' version '1.1-SNAPSHOT'
+	id 'maven-publish'
+}
+
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
+
+archivesBaseName = project.archives_base_name
+version = project.mod_version
+group = project.maven_group
+
+repositories {
+	mavenCentral()
+	maven {
+		name = "Ladysnake"
+		url = "https://maven.ladysnake.org/releases"
+	}
+	maven {
+		name = "Shedaniel"
+		url = "https://maven.shedaniel.me/"
+	}
+	maven {
+		name = "TerraformersMC"
+		url = "https://maven.terraformersmc.com"
+	}
+	maven {
+		name = "Nucleoid"
+		url = "https://maven.nucleoid.xyz/"
+	}
+	maven {
+		name = "Modrinth"
+		url = "https://api.modrinth.com/maven"
+		content {
+			includeGroup "maven.modrinth"
+		}
+	}
+	maven {
+        name = "Cursemaven"
+        url = "https://cursemaven.com"
+    }
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    
+	modImplementation "maven.modrinth:data-attributes-directors-cut:${project.dataattributes_version}"
+    
+    modImplementation "maven.modrinth:opc-directors-cut:${project.opc_dc_version}"
+    include "maven.modrinth:opc-directors-cut:${project.opc_dc_version}"
+    
+    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cardinal_components_version}"
+    include "dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cardinal_components_version}"
+    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cardinal_components_version}"
+    include "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cardinal_components_version}"
+	modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-chunk:${project.cardinal_components_version}"
+    include "dev.onyxstudios.cardinal-components-api:cardinal-components-chunk:${project.cardinal_components_version}"
+	
+	modApi("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
+		exclude(group: "net.fabricmc.fabric-api")
+	}
+    
+	modImplementation("com.terraformersmc:modmenu:${project.modmenu_version}") {
+		exclude(group: "net.fabricmc.fabric-api")
+	}
+	
+	modImplementation "maven.modrinth:projectile-damage-attribute:${project.projectile_damage_attribute_version}-fabric"
+	modImplementation include("eu.pb4:placeholder-api:${project.placeholder_api}")
+	
+	implementation 'net.objecthunter:exp4j:0.4.8'
+	include 'net.objecthunter:exp4j:0.4.8'
+}
+
+processResources {
+	inputs.property "version", project.version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": project.version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 17
+}
+
+javadoc {
+	options.addStringOption("Xdoclint:none", "-quiet")
+	classpath = files(sourceSets.main.compileClasspath)
+	include("**/api/**")
+}
+
+task javadocJar(type: Jar) {
+	dependsOn javadoc
+	dependsOn processResources
+	from javadoc.destinationDir
+	from file("build/resources/main/fabric.mod.json")
+	archiveClassifier = "javadoc"
+}
+
+// Modrinth has issues accepting javadocs right now
+// build.dependsOn javadocJar
+
+java {
+	withSourcesJar()
+}
+
+jar {
+	from("LICENSE") {
+		rename { "${it}_${project.archivesBaseName}"}
+	}
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+		}
+	}
+    
+	repositories {
+		
+	}
+}
