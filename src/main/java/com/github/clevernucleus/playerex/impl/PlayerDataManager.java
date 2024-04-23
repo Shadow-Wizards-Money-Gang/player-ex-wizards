@@ -150,14 +150,23 @@ public final class PlayerDataManager implements PlayerData, AutoSyncedComponent 
 	}
 
 	@Override
-	public void reset(int percent) {
-		if (percent == 100)
+	public void reset(int percent, int takeLevels) {
+		if (takeLevels > 0)
 			return;
+
+
+		int lvlLoss = 1 + takeLevels;
 		NbtList list = new NbtList();
 
+		Identifier levelIden = null;
 		// # TODO reduces singular levels based on max lvl instead of %
+		int lvlsToTake = 0;
 		for (Iterator<Identifier> iterator = this.data.keySet().iterator(); iterator.hasNext();) {
 			Identifier identifier = iterator.next();
+			if(identifier.toString().equals("playerex:level")) {
+				levelIden = identifier;
+                continue;
+            }
 
 			if (percent == 0) {
 				if (!this.tryRemove(identifier, id -> iterator.remove()))
@@ -168,9 +177,13 @@ public final class PlayerDataManager implements PlayerData, AutoSyncedComponent 
 				entry.putBoolean("Remove", true);
 				list.add(entry);
 			} else {
-				double value = this.data.getOrDefault(identifier, 0.0D) * 0.01D * percent;
-				if (!this.trySet(identifier, value))
+				double intialVal =  this.data.getOrDefault(identifier, 0.0D);
+				double actualVal = intialVal - lvlLoss * (intialVal > 18 ? 2 : 1);
+				double value = Math.max(actualVal, 0);
+				if (!this.trySet(identifier, value) || actualVal < 0)
 					continue;
+
+				lvlsToTake += lvlLoss * (intialVal > 18 ? 2 : 1);
 				NbtCompound entry = new NbtCompound();
 				entry.putString("Key", identifier.toString());
 				entry.putDouble("Value", value);
@@ -179,8 +192,19 @@ public final class PlayerDataManager implements PlayerData, AutoSyncedComponent 
 			}
 		}
 
-		this.refundPoints = Math.round((float) this.refundPoints * 0.01F * (float) percent);
-		this.skillPoints = Math.round((float) this.skillPoints * 0.01F * (float) percent);
+		if(levelIden != null) {
+			setLevel(lvlsToTake, list, levelIden);
+		}
+
+		if(lvlsToTake == 0) {
+			this.refundPoints = Math.max(Math.round((float) this.refundPoints - lvlLoss), 0);
+			if(this.skillPoints > 0) {
+				this.skillPoints = Math.max(Math.round((float) this.skillPoints - lvlLoss), 0);
+				setLevel(lvlLoss, list, levelIden);
+			}
+
+		}
+
 		this.sync((buf, player) -> {
 			NbtCompound tag = new NbtCompound();
 			tag.put(KEY_RESET, list);
@@ -188,6 +212,17 @@ public final class PlayerDataManager implements PlayerData, AutoSyncedComponent 
 			tag.putInt(KEY_REFUND_POINTS, this.refundPoints);
 			buf.writeNbt(tag);
 		});
+	}
+
+	private void setLevel(int lvlLoss, NbtList list, Identifier levelIden) {
+		double value = this.data.getOrDefault(levelIden, 0.0D) - lvlLoss;
+		if (this.trySet(levelIden, value)) {
+			NbtCompound entry = new NbtCompound();
+			entry.putString("Key", levelIden.toString());
+			entry.putDouble("Value", value);
+			entry.putBoolean("Remove", false);
+			list.add(entry);
+		}
 	}
 
 	@Override

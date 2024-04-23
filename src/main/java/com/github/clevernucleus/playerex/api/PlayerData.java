@@ -40,7 +40,7 @@ public interface PlayerData extends Component {
 	 * Resets all data (including attribute modifiers) to their defaults - for modifiers this means removing them and deleting the cache.
 	 * @param percent of skill points remaining.
 	 */
-	void reset(int percent);
+	void reset(int percent, int takeLevels);
 	
 	/**
 	 * Adds skill points to the player.

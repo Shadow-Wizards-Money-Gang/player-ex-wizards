@@ -52,7 +52,7 @@ public final class CommandsImpl {
 				.argument("player", EntityArgumentType.player()).executes(ctx -> {
 					ServerPlayerEntity serverPlayerEntity = EntityArgumentType.getPlayer(ctx, "player");
 					PlayerData playerData = ExAPI.PLAYER_DATA.get(serverPlayerEntity);
-					playerData.reset(ExAPI.getConfig().resetOnDeath());
+					playerData.reset(ExAPI.getConfig().resetOnDeath(), 0);
 					ctx.getSource().sendFeedback(
 							() -> Text.translatable("playerex.command.reset", serverPlayerEntity.getName()), false);
 
@@ -65,7 +65,7 @@ public final class CommandsImpl {
 		LiteralCommandNode<ServerCommandSource> reset = CommandManager.literal("reset_all").executes(ctx -> {
 			PlayerLookup.all(ctx.getSource().getServer()).forEach(player -> {
 				PlayerData playerData = ExAPI.PLAYER_DATA.get(player);
-				playerData.reset(ExAPI.getConfig().resetOnDeath());
+				playerData.reset(ExAPI.getConfig().resetOnDeath(), 0);
 			});
 
 			ctx.getSource().sendFeedback(() -> Text.translatable("playerex.command.reset", "*"), false);

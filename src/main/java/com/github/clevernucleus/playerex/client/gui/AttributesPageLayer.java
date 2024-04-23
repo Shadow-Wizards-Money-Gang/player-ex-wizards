@@ -80,7 +80,7 @@ public class AttributesPageLayer extends PageLayer {
 			double value = this.canRefund() ? -1.0D : 1.0D;
 			ClientUtil.modifyAttributes(this.canRefund() ? PacketType.REFUND : PacketType.SKILL,
 					c -> c.accept(attribute, value));
-			this.client.player.playSound(PlayerEx.SP_SPEND_SOUND, SoundCategory.NEUTRAL,
+			this.client.player.playSound(PlayerEx.LEVEL_UP_SOUND, SoundCategory.NEUTRAL,
 					ExAPI.getConfig().skillUpVolume(), ExAPI.getConfig().skillUpPitch());
 			return (Object) null;
 		});

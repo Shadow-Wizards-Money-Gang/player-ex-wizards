@@ -11,6 +11,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
@@ -25,8 +26,9 @@ public final class EventFactory {
 
 	public static void reset(final ServerPlayerEntity oldPlayer, final ServerPlayerEntity newPlayer,
 			final boolean isAlive) {
+		int takeLevels = (oldPlayer.hasStatusEffect(StatusEffects.LUCK) ? 1 : 0) + (oldPlayer.hasStatusEffect(StatusEffects.BAD_OMEN) ? -1 : 0);
 		PlayerData playerData = ExAPI.PLAYER_DATA.get(newPlayer);
-		playerData.reset(ExAPI.getConfig().resetOnDeath());
+		playerData.reset(ExAPI.getConfig().resetOnDeath(), takeLevels);
 	}
 
 	public static double clamped(final EntityAttribute attributeIn, final double valueIn) {
