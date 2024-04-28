@@ -54,8 +54,12 @@ public final class ConfigServer {
 	}
 
 	protected int level(final double value) {
-		Expression expression2 = this.expression.setVariable(VARIABLE, Math.round((float) value));
-		return Math.abs(Math.round((float) expression2.evaluate()));
+		if(value < 9) {
+            return (int) Math.round(5 + value / 2);
+        } else {
+			Expression expression2 = this.expression.setVariable(VARIABLE, Math.round((float) value));
+			return Math.abs(Math.round((float) expression2.evaluate()));
+        }
 	}
 
 	public void readFromNbt(NbtCompound tag) {
