@@ -17,6 +17,9 @@ abstract class ServerPlayerEntityMixin {
     // Inject code at the end of the addExperienceLevels method
     @Inject(method = "addExperienceLevels", at = @At("TAIL"))
     private void playerex_addExperienceLevels(int levels, CallbackInfo info) {
+        // #TODO can't go higher than lv 18 exp wise.
+
+
         // Cast this mixin to ServerPlayerEntity to access player-related methods and fields
         ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
         
